@@ -9,6 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Domain\Repositories\OfferPriceRepositoryInterface;
+use App\Infrastructure\Services\OfferApiService;
 
 class ImportOfferPricesJob implements ShouldQueue
 {
@@ -20,9 +21,9 @@ class ImportOfferPricesJob implements ShouldQueue
     {
     }
 
-    public function handle(OfferPriceRepositoryInterface $priceRepository)
+    public function handle(OfferApiService $api, OfferPriceRepositoryInterface $priceRepository)
     {
-        $context = new OfferStateContext(new PricesState($priceRepository));
+        $context = new OfferStateContext(new PricesState($api, $priceRepository));
         $context->handle($this->reference);
     }
 }

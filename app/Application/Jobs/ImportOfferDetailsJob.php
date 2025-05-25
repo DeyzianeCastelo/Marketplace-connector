@@ -8,6 +8,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Domain\States\OfferStateContext;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Infrastructure\Services\OfferApiService;
 use App\Domain\Repositories\OfferRepositoryInterface;
 
 class ImportOfferDetailsJob implements ShouldQueue
@@ -20,9 +21,11 @@ class ImportOfferDetailsJob implements ShouldQueue
     {
     }
 
-    public function handle(OfferRepositoryInterface $offerRepository)
-    {
-        $context = new OfferStateContext(new DetailsState($offerRepository));
+    public function handle(
+        OfferApiService $api,
+        OfferRepositoryInterface $offerRepository
+    ) {
+        $context = new OfferStateContext(new DetailsState($api, $offerRepository));
         $context->handle($this->reference);
     }
 }

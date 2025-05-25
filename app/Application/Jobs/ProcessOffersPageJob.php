@@ -4,11 +4,11 @@ namespace App\Application\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Application\Jobs\ImportOfferDetailsJob;
+use App\Infrastructure\Services\OfferApiService;
 
 class ProcessOffersPageJob implements ShouldQueue
 {
@@ -20,13 +20,11 @@ class ProcessOffersPageJob implements ShouldQueue
     {
     }
 
-    public function handle()
+    public function handle(OfferApiService $api)
     {
         Log::info("Processando página {$this->page} de anúncios.");
 
-        $response = Http::get("http://host.docker.internal:3000/offers", [
-            'page' => $this->page,
-        ]);
+        $response = $api->getOffers($this->page);
 
         if ($response->failed()) {
             Log::error("Falha ao buscar página {$this->page} da API do Marketplace.");

@@ -3,22 +3,25 @@
 namespace App\Domain\States;
 
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
-use App\Domain\Entities\OfferPrice as DomainOfferPrice;
 use App\Domain\Events\OfferPricesImported;
-use App\Infrastructure\Eloquent\Models\Offer as EloquentOffer;
+use App\Infrastructure\Services\OfferApiService;
+use App\Domain\Entities\OfferPrice as DomainOfferPrice;
 use App\Domain\Repositories\OfferPriceRepositoryInterface;
+use App\Infrastructure\Eloquent\Models\Offer as EloquentOffer;
 
 class PricesState implements OfferStateInterface
 {
-    public function __construct(private OfferPriceRepositoryInterface $priceRepository)
-    {
+    public function __construct(
+        private OfferApiService $api,
+        private OfferPriceRepositoryInterface $priceRepository
+    ) {
     }
 
     public function handle(string $reference): void
     {
         Log::info("Buscando preços do anúncio {$reference}.");
-        $response = Http::get("http://host.docker.internal:3000/offers/{$reference}/prices");
+
+        $response = $this->api->getOfferPrices($reference);
 
         if ($response->failed()) {
             Log::error("Erro ao buscar preços do anúncio {$reference}.");

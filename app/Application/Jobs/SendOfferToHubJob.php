@@ -8,6 +8,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Infrastructure\Services\OfferApiService;
 use App\Domain\Repositories\OfferRepositoryInterface;
 
 class SendOfferToHubJob implements ShouldQueue
@@ -27,7 +28,7 @@ class SendOfferToHubJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(OfferRepositoryInterface $offerRepository): void
+    public function handle(OfferApiService $api, OfferRepositoryInterface $offerRepository): void
     {
         $offer = $offerRepository->findByReference($this->reference);
 
@@ -43,7 +44,7 @@ class SendOfferToHubJob implements ShouldQueue
             'stock' => $offer->stock,
         ];
 
-        $response = Http::post('http://host.docker.internal:3000/hub/create-offer', $payload);
+        $response = $api->postCreateOfferHub($payload);
 
         if ($response->successful()) {
             Log::info("Anúncio {$this->reference} enviado com sucesso ao Hub.");

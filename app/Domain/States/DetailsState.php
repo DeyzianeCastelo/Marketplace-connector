@@ -2,22 +2,25 @@
 
 namespace App\Domain\States;
 
-use Illuminate\Support\Facades\Log;
 use App\Domain\Entities\Offer;
+use Illuminate\Support\Facades\Log;
 use App\Domain\Events\OfferImported;
-use Illuminate\Support\Facades\Http;
+use App\Infrastructure\Services\OfferApiService;
 use App\Domain\Repositories\OfferRepositoryInterface;
 
 class DetailsState implements OfferStateInterface
 {
-    public function __construct(private OfferRepositoryInterface $offerRepository)
-    {
+    public function __construct(
+        private OfferApiService $api,
+        private OfferRepositoryInterface $offerRepository
+    ) {
     }
 
     public function handle(string $reference): void
     {
         Log::info("Buscando detalhes do anúncio {$reference}.");
-        $response = Http::get("http://host.docker.internal:3000/offers/{$reference}");
+
+        $response = $this->api->getOfferDetails($reference);
 
         if ($response->failed()) {
             Log::error("Erro ao buscar detalhes do anúncio {$reference}.");
