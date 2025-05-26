@@ -2,28 +2,34 @@
 
 namespace App\Application\Jobs;
 
-use App\Domain\Repositories\OfferImageRepositoryInterface;
+use Illuminate\Bus\Queueable;
 use App\Domain\States\ImagesState;
 use App\Domain\States\OfferStateContext;
-use App\Infrastructure\Services\OfferApiService;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use App\Infrastructure\Services\OfferApiService;
+use App\Domain\Repositories\OfferImageRepositoryInterface;
+use App\Domain\Repositories\OfferProcessingRepositoryInterface;
 
 class ImportOfferImagesJob implements ShouldQueue
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use SerializesModels;
+    use Queueable;
+
+    private const PART_NAME = 'images';
+    private const PART_EXPIRATION_SECONDS = 600;
 
     public function __construct(private string $reference)
     {
     }
 
-    public function handle(OfferApiService $api, OfferImageRepositoryInterface $imageRepository)
-    {
+    public function handle(
+        OfferApiService $api,
+        OfferImageRepositoryInterface $imageRepository,
+        OfferProcessingRepositoryInterface $processingRepository
+    ) {
         $context = new OfferStateContext(new ImagesState($api, $imageRepository));
         $context->handle($this->reference);
+
+        $processingRepository->markPartAsCompleted($this->reference, self::PART_NAME);
+        $processingRepository->setPartExpiry($this->reference, self::PART_EXPIRATION_SECONDS);
     }
 }

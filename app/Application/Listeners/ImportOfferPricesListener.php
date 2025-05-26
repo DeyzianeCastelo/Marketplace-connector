@@ -9,6 +9,6 @@ class ImportOfferPricesListener
 {
     public function handle(OfferImagesImported $event): void
     {
-        ImportOfferPricesJob::dispatch($event->reference);
+        dispatch(new ImportOfferPricesJob($event->reference));
     }
 }

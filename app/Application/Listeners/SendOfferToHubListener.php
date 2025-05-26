@@ -9,6 +9,6 @@ class SendOfferToHubListener
 {
     public function handle(OfferPricesImported $event): void
     {
-        SendOfferToHubJob::dispatch($event->reference);
+        dispatch(new SendOfferToHubJob($event->reference));
     }
 }

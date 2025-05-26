@@ -5,7 +5,9 @@ namespace App\Providers;
 use App\Domain\Events\OfferImported;
 use App\Domain\Events\OfferImagesImported;
 use App\Domain\Events\OfferPricesImported;
+use App\Domain\Events\OffersPageProcessingCompleted;
 use App\Application\Listeners\SendOfferToHubListener;
+use App\Application\Listeners\ProcessNextPageListener;
 use App\Application\Listeners\ImportOfferImagesListener;
 use App\Application\Listeners\ImportOfferPricesListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -26,6 +28,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         OfferPricesImported::class => [
             SendOfferToHubListener::class,
+        ],
+        OffersPageProcessingCompleted::class => [
+            ProcessNextPageListener::class,
         ],
     ];
 

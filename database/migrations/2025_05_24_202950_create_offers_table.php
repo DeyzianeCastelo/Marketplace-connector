@@ -17,13 +17,6 @@ return new class () extends Migration {
             $table->text('description')->nullable();
             $table->string('status');
             $table->integer('stock')->default(0);
-            $table->enum('import_state', [
-                'pending',
-                'details_fetched',
-                'images_fetched',
-                'prices_fetched',
-                'completed'
-            ])->default('pending');
             $table->timestamps();
         });
     }

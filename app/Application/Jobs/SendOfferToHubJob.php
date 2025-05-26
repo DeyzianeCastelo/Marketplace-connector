@@ -3,9 +3,6 @@
 namespace App\Application\Jobs;
 
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Infrastructure\Services\OfferApiService;
@@ -13,21 +10,13 @@ use App\Domain\Repositories\OfferRepositoryInterface;
 
 class SendOfferToHubJob implements ShouldQueue
 {
-    use InteractsWithQueue;
     use Queueable;
-    use SerializesModels;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         private string $reference
     ) {
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(OfferApiService $api, OfferRepositoryInterface $offerRepository): void
     {
         $offer = $offerRepository->findByReference($this->reference);
