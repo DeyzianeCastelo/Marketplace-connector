@@ -1,61 +1,75 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Marketplace Connector
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este sistema foi desenvolvido para realizar a integração entre um Marketplace e um Hub, simulando a importação de anúncios e o envio estruturado dos dados via API. A arquitetura foi pensada para ser escalável, desacoplada e de fácil manutenção, aplicando conceitos como Clean Architecture, filas assíncronas, controle de estados com o padrão State e separação clara de responsabilidades entre camadas.
 
-## About Laravel
+## Tecnologias utilizadas
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.3
+- Laravel 12
+- MySQL
+- Docker + Laravel Sail
+- Redis
+- Queue/Jobs
+- Events/Listeners
+- Clean Architecture
+- Design Pattern: State
+- Repository Pattern
+- Mockoon (mock de APIs REST)
+- PSR-4 / PSR-12
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Como executar o projeto
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Pré-requisitos
 
-## Learning Laravel
+- Docker
+- Docker Compose
+- PHP 8.x (caso execute localmente)
+- Composer
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 1. Clonar o repositório
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```bash
+git clone https://github.com/DeyzianeCastelo/Marketplace-connector.git
+cd marketplace-connector
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2. Subir os containers com Laravel Sail
 
-## Laravel Sponsors
+```bash
+./vendor/bin/sail up -d
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 3. Rode as migrations
 
-### Premium Partners
+```bash
+./vendor/bin/sail artisan migrate
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 4. Configure o Mockoon
 
-## Contributing
+Baixe o arquivo mocketplace.json e suba o mock via Docker:
+```bash
+docker run -d --mount type=bind,source="$(pwd)/mocketplace.json",target=/data,readonly -p 3000:3000 mockoon/cli:latest -d /data -p 3000
+```
+> As URLs da API mock estarão disponíveis em http://localhost:3000
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 5. Inicie a fila de jobs
 
-## Code of Conduct
+```bash
+./vendor/bin/sail artisan queue:work
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 6. Realize a requisição para importar anúncios com:
 
-## Security Vulnerabilities
+```bash
+curl -X POST http://localhost/api/import-offers
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Arquitetura e padrões utilizados
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- Clean Architecture: Separação clara entre camadas (Domínio, Casos de Uso, Infraestrutura, Interface)
+- Repository Pattern: Comunicação com o banco de dados abstraída por interfaces
+- State Pattern: Controle de estados de importação de cada anúncio (detalhes, imagens, preços)
+- Jobs e Queues: Todas as etapas são processadas de forma assíncrona
+- Redis: Usado como controle de estados e contador de partes completas
+- Events/Listeners: Estrutura preparada para extensão com eventos
