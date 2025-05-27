@@ -23,7 +23,7 @@ Este sistema foi desenvolvido para realizar a integração entre um Marketplace 
 
 - Docker
 - Docker Compose
-- PHP 8.x (caso execute localmente)
+- PHP 8.x (caso deseje executar localmente)
 - Composer
 
 ### 1. Clonar o repositório
@@ -33,33 +33,45 @@ git clone https://github.com/DeyzianeCastelo/Marketplace-connector.git
 cd marketplace-connector
 ```
 
-### 2. Subir os containers com Laravel Sail
+## 2. Configurar o ambiente
+
+```bash
+cp .env.example .env
+composer install
+php artisan key:generate
+```
+> Caso esteja utilizando o Laravel Sail, você pode usar:
+```bash
+./vendor/bin/sail php artisan key:generate
+```
+
+### 3. Subir os containers com Laravel Sail
 
 ```bash
 ./vendor/bin/sail up -d
 ```
 
-### 3. Rode as migrations
+### 4. Rode as migrations
 
 ```bash
 ./vendor/bin/sail artisan migrate
 ```
 
-### 4. Configure o Mockoon
+### 5. Configure o Mockoon
 
-Baixe o arquivo mocketplace.json e suba o mock via Docker:
+Baixe o arquivo `mocketplace.json` e execute o comando abaixo para subir o mock via Docker:
 ```bash
 docker run -d --mount type=bind,source="$(pwd)/mocketplace.json",target=/data,readonly -p 3000:3000 mockoon/cli:latest -d /data -p 3000
 ```
 > As URLs da API mock estarão disponíveis em http://localhost:3000
 
-### 5. Inicie a fila de jobs
+### 6. Inicie a fila de jobs
 
 ```bash
 ./vendor/bin/sail artisan queue:work
 ```
 
-### 6. Realize a requisição para importar anúncios com:
+### 7. Realize a requisição para importar anúncios com:
 
 ```bash
 curl -X POST http://localhost/api/import-offers
